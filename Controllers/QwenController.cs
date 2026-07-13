@@ -10,8 +10,8 @@ public class QwenController(IHttpClientFactory httpClientFactory, IConfiguration
     [HttpPost("chat")]
     public async Task<IActionResult> Chat([FromBody] ChatRequest data)
     {
-        var content = data.Message;
-        var session = data.Session;
+        var content = data.Content;
+        var session = data.SessionId;
         if (content == null || session == null) return BadRequest();
         var client = httpClientFactory.CreateClient("qwen");
         client.DefaultRequestHeaders.Add("Authorization", "Bearer " + config["Qwen:ApiKey"]);
