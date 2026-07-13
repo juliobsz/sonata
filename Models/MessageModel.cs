@@ -1,0 +1,17 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace qwen_hackathon_api.Models;
+
+[Table("messages")]
+public class Message
+{
+    [Column("id")]
+    public long Id { get; set; }
+    [Column("session_id")]
+    public Guid SessionId { get; set; }
+    [Column("content")]
+    public string Content { get; set; } = null!;
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }  = DateTime.Now;
+}
