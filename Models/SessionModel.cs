@@ -7,7 +7,7 @@ public class Session
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
     [Column("started_at")]
-    public DateTime StartedAt { get; set; } = DateTime.Now;
+    public DateTimeOffset StartedAt { get; set; } = DateTimeOffset.UtcNow;
     [Column("ended_at")]
-    public DateTime? EndedAt { get; set; }
+    public DateTimeOffset? EndedAt { get; set; }
 }

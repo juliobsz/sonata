@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,8 @@ public class Message
     [Column("session_id")]
     public Guid SessionId { get; set; }
     [Column("content")]
+    [MaxLength(2000)]
     public string Content { get; set; } = null!;
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }  = DateTime.Now;
+    public DateTimeOffset CreatedAt { get; set; }  = DateTimeOffset.UtcNow;
 }
