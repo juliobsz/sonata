@@ -17,4 +17,9 @@ public class SessionRepository(ApplicationDbContext context) : ISessionRepositor
         await context.SaveChangesAsync();
         return session;
     }
+
+    public async Task<IEnumerable<Session>> GetSessionsAsync()
+    {
+        return await context.Sessions.ToArrayAsync();
+    }
 }

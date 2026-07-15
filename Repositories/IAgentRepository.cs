@@ -6,6 +6,7 @@ public interface ISessionRepository
 {
     Task<Session?> GetSessionAsync(Guid id);
     Task<Session> AddSessionAsync(Session session);
+    Task<IEnumerable<Session>> GetSessionsAsync();
 }
 
 public interface IMessageRepository
