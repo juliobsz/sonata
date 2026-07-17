@@ -1,10 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Sonata.Server.Data;
+using Sonata.Server.ModelProviders;
 using Sonata.Server.Repositories;
+using Sonata.Server.ModelProviders.Qwen;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddOptions<QwenOptions>()
+    .Bind(builder.Configuration.GetSection(QwenOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 var allowedOrigins = builder.Configuration
     .GetSection("AllowedOrigins")
@@ -23,7 +29,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IModelProvider, QwenModelProvider>();
 
 var app = builder.Build();
 
