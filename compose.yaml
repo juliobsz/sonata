@@ -1,0 +1,22 @@
+﻿name: sonata
+
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    environment:
+      POSTGRES_DB: sonata
+      POSTGRES_USER: sonata
+      POSTGRES_PASSWORD: ${SONATA_POSTGRES_PASSWORD:?Set SONATA_POSTGRES_PASSWORD before starting PostgreSQL}
+    ports:
+      - "5432:5432"
+    volumes:
+      - sonata-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonata -d sonata"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      
+volumes:
+  sonata-postgres-data:
