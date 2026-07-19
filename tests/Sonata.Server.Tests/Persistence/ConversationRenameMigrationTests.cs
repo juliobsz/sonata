@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Sonata.Server.Data;
+using Sonata.Server.Models;
 using Testcontainers.PostgreSql;
 
 namespace Sonata.Server.Tests.Persistence;
@@ -45,8 +46,11 @@ public sealed class ConversationRenameMigrationTests : IAsyncLifetime
         var conversation = await context.Conversations.SingleAsync(item => item.Id == conversationId);
         var message = await context.Messages.SingleAsync(item =>
                 item.ConversationId == conversationId);
+        var movement = await context.Movements.SingleAsync();
 
         Assert.Equal(conversationId, conversation.Id);
+        Assert.Equal(Movement.HackathonId, conversation.MovementId);
+        Assert.Equal("Qwen AI Hackathon", movement.Name);
         Assert.Equal(conversationId, message.ConversationId);
         Assert.Equal("preserve me", message.Content);
         Assert.Equal(1, message.Sequence);

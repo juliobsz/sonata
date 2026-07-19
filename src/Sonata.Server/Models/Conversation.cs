@@ -14,5 +14,10 @@ public sealed class Conversation
     [Column("ended_at")]
     public DateTimeOffset? EndedAt { get; set; }
     
+    [Column("movement_id")]
+    public Guid MovementId { get; set; } = Movement.HackathonId;
+    
+    public Movement Movement { get; set; } = null!;
+    
     public ICollection<Message> Messages { get; } = new List<Message>();
 }

@@ -33,7 +33,7 @@ public class ApiService(HttpClient? httpClient = null)
 
     public async Task<ObservableCollection<Message>> GetMessagesAsync(Guid conversationId)
     {
-        var res = await _httpClient.GetAsync($"conversations    /{conversationId}/messages");
+        var res = await _httpClient.GetAsync($"conversations/{conversationId}/messages");
         res.EnsureSuccessStatusCode();
 
         var body = await res.Content.ReadFromJsonAsync<MessageResponse>();
