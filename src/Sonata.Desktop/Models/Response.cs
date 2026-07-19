@@ -5,10 +5,13 @@ namespace Sonata.Desktop.Models;
 public sealed class ContinueConversationResponse
 {
     [JsonPropertyName("content")]
-    public string? Content { get; set; }
+    public string Content { get; set; } = string.Empty;
     
     [JsonPropertyName("conversationId")]
-    public string? ConversationId { get; set; }
+    public Guid ConversationId { get; set; }
+    
+    [JsonPropertyName("memoryDiff")]
+    public MemoryDiffItem[] MemoryDiff { get; set; } = [];
 }
 
 public sealed class ConversationListResponse
@@ -21,4 +24,10 @@ public sealed class MessageResponse
 {
     [JsonPropertyName("messages")]
     public Message[] Messages { get; set; } = [];
+}
+
+public sealed class MemoryListResponse
+{
+    [JsonPropertyName("memories")]
+    public MemoryItem[] Memories { get; set; } = [];
 }
