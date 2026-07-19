@@ -5,7 +5,7 @@ using Sonata.Server.Models;
 namespace Sonata.Server.Conversations;
 
 public sealed class ConversationService(
-    ISessionRepository sessionRepository,
+    IConversationRepository conversationRepository,
     IMessageRepository messageRepository,
     IModelProvider modelProvider) : IConversationService
 {
@@ -15,22 +15,22 @@ public sealed class ConversationService(
         if (string.IsNullOrWhiteSpace(command.Content))
             throw new ArgumentException("Conversation content can't be empty.", nameof(command));
 
-        var session = await sessionRepository.GetSessionAsync(command.ConversationId)
-                      ?? await sessionRepository.AddSessionAsync(new Session
+        var conversation = await conversationRepository.GetConversationAsync(command.ConversationId)
+                      ?? await conversationRepository.AddConversationAsync(new Conversation
                       {
                           Id = command.ConversationId,
-                          StartedAt = DateTimeOffset.UtcNow,
+                          CreatedAt = DateTimeOffset.UtcNow,
                       });
 
         var userMessage = await messageRepository.AddMessageAsync(new Message
         {
-            SessionId = session.Id,
+            ConversationId = conversation.Id,
             Content = command.Content,
             Role = "user",
             CreatedAt = DateTimeOffset.UtcNow,
         });
         
-        var history = await messageRepository.GetMessagesBySessionId(session.Id);
+        var history = await messageRepository.GetMessagesByConversationId(conversation.Id);
 
         var generated = await modelProvider.GenerateResponseAsync(new GenerateResponseRequest(
                 history.Select(message => new ModelMessage(
@@ -41,13 +41,13 @@ public sealed class ConversationService(
 
         var assistantMessage = await messageRepository.AddMessageAsync(new Message
         {
-            SessionId = session.Id,
+            ConversationId = conversation.Id,
             Content = generated.Text,
             Role = generated.Role,
             CreatedAt = DateTimeOffset.UtcNow,
         });
         
-        return new ConversationTurn(session.Id, ToContract(userMessage), ToContract(assistantMessage));
+        return new ConversationTurn(conversation.Id, ToContract(userMessage), ToContract(assistantMessage));
     }
     
     private static ConversationMessage ToContract(Message message)

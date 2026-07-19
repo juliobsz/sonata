@@ -4,13 +4,13 @@ using Sonata.Desktop.ViewModels;
 
 namespace Sonata.Desktop.Views;
 
-public partial class ChatView : Window
+public partial class ConversationView : Window
 {
-    public ChatView()
+    public ConversationView()
     {
         InitializeComponent();
         
-        DataContext = new ChatViewModel();
+        DataContext = new ConversationViewModel();
     }
 
     private void CommandInputPreviewKeyDown(object sender, KeyEventArgs e)

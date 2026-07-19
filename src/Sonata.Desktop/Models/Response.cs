@@ -2,20 +2,23 @@ using System.Text.Json.Serialization;
 
 namespace Sonata.Desktop.Models;
 
-public class ChatResponse
+public sealed class ContinueConversationResponse
 {
     [JsonPropertyName("content")]
     public string? Content { get; set; }
-    [JsonPropertyName("sessionId")]
-    public string? SessionId { get; set; }
+    
+    [JsonPropertyName("conversationId")]
+    public string? ConversationId { get; set; }
 }
 
-public class SessionResponse
+public sealed class ConversationListResponse
 {
-    public Session[] Sessions { get; set; } = [];
+    [JsonPropertyName("conversations")]
+    public Conversation[] Conversations { get; set; } = [];
 }
 
-public class MessageResponse
+public sealed class MessageResponse
 {
+    [JsonPropertyName("messages")]
     public Message[] Messages { get; set; } = [];
 }

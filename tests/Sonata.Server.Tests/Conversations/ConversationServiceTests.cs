@@ -16,7 +16,7 @@ public sealed class ConversationServiceTests(PostgreSqlFixture fixture)
     {
         await using var context = fixture.CreateDbContext();
         var conversationId = Guid.NewGuid();
-        context.Sessions.Add(new Session
+        context.Conversations.Add(new Conversation
         {
             Id = conversationId
         });
@@ -28,7 +28,7 @@ public sealed class ConversationServiceTests(PostgreSqlFixture fixture)
 
         var provider =
             new ScriptedModelProvider(new GeneratedResponse("Current answer", "assistant", "provider-response-123"));
-        IConversationService service = new ConversationService(new SessionRepository(context), messageRepository, provider);
+        IConversationService service = new ConversationService(new ConversationRepository(context), messageRepository, provider);
         
         var turn = await service.ContinueAsync(new ContinueConversationCommand(conversationId, "Current question"), CancellationToken.None);
         
@@ -52,13 +52,13 @@ public sealed class ConversationServiceTests(PostgreSqlFixture fixture)
         await using var context = fixture.CreateDbContext();
         var conversationId = Guid.NewGuid();
         var messageRepository = new MessageRepository(context);
-        IConversationService service = new ConversationService(new SessionRepository(context), messageRepository, new ScriptedModelProvider.FailingModelProvider());
+        IConversationService service = new ConversationService(new ConversationRepository(context), messageRepository, new ScriptedModelProvider.FailingModelProvider());
         
         await Assert.ThrowsAsync<ModelProviderException>(() => service.ContinueAsync(
             new ContinueConversationCommand(conversationId, "Please answer"),
             CancellationToken.None));
 
-        var messages = await messageRepository.GetMessagesBySessionId(conversationId);
+        var messages = await messageRepository.GetMessagesByConversationId(conversationId);
 
         var onlyMessage = Assert.Single(messages);
         Assert.Equal("user", onlyMessage.Role);
@@ -69,7 +69,7 @@ public sealed class ConversationServiceTests(PostgreSqlFixture fixture)
     {
         return new Message
         {
-            SessionId = conversationId,
+            ConversationId = conversationId,
             Content = content,
             Role = role,
             CreatedAt = DateTimeOffset.UtcNow

@@ -16,5 +16,6 @@ public sealed class PostgreSqlFixtureTests(PostgreSqlFixture fixture)
         
         Assert.True(canConnect);
         Assert.Contains("20260714200047_InitialCreate", migrations);
+        Assert.Contains(migrations, migration => migration.EndsWith("_RenameSessionToConversation"));
     }
 }

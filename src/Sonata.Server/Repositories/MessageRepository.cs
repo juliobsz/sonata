@@ -14,7 +14,7 @@ public class MessageRepository(ApplicationDbContext context) : IMessageRepositor
     public async Task<Message> AddMessageAsync(Message message)
     {
         var previousSequence = await context.Messages
-            .Where(existing => existing.SessionId == message.SessionId)
+            .Where(existing => existing.ConversationId == message.ConversationId)
             .MaxAsync(existing => (int?)existing.Sequence) ?? 0;
         
         message.Sequence = previousSequence + 1;
@@ -24,11 +24,11 @@ public class MessageRepository(ApplicationDbContext context) : IMessageRepositor
         return message;
     }
 
-    public async Task<IReadOnlyList<Message>> GetMessagesBySessionId(Guid sessionId)
+    public async Task<IReadOnlyList<Message>> GetMessagesByConversationId(Guid conversationId)
     {
         return await context.Messages
             .AsNoTracking()
-            .Where(message => message.SessionId == sessionId)
+            .Where(message => message.ConversationId == conversationId)
             .OrderBy(message => message.Sequence)
             .ThenBy(message => message.Id)
             .ToListAsync();

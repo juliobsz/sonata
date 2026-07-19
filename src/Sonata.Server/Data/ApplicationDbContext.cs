@@ -5,20 +5,20 @@ namespace Sonata.Server.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Message>()
-            .HasOne(message => message.Session)
-            .WithMany(session => session.Messages)
-            .HasForeignKey(message => message.SessionId)
+            .HasOne(message => message.Conversation)
+            .WithMany(conversation => conversation.Messages)
+            .HasForeignKey(message => message.ConversationId)
             .OnDelete(DeleteBehavior.Cascade);
         
         modelBuilder.Entity<Message>().HasIndex(message => new
         {
-            message.SessionId,
+            message.ConversationId,
             message.Sequence
         }).IsUnique();
         

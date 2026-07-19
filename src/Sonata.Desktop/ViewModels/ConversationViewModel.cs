@@ -7,16 +7,16 @@ using Sonata.Desktop.Services;
 
 namespace Sonata.Desktop.ViewModels;
 
-public class ChatViewModel : INotifyPropertyChanged
+public class ConversationViewModel : INotifyPropertyChanged
 {
     private string _currentInput = string.Empty;
     private bool _isBusy;
-    private Session? _currentSession;
+    private Conversation? _currentConversation;
     private readonly ApiService _apiService;
-    private long _sessionLoadVersion;
+    private long _conversationLoadVersion;
 
     public ObservableCollection<Message> Messages { get; } = new();
-    public ObservableCollection<Session> Sessions { get; } = new();
+    public ObservableCollection<Conversation> Conversations { get; } = new();
 
     public string CurrentInput
     {
@@ -42,41 +42,41 @@ public class ChatViewModel : INotifyPropertyChanged
         }
     }
 
-    public Session? CurrentSession
+    public Conversation? CurrentConversation
     {
-        get => _currentSession;
+        get => _currentConversation;
         set
         {
-            if (_currentSession == value) return;
-            SetCurrentSession(value, loadMessages: true);
+            if (_currentConversation == value) return;
+            SetCurrentConversation(value, loadMessages: true);
         }
     }
 
     public AsyncRelayCommand SendCommand { get; }
     public AsyncRelayCommand NewChatCommand { get; }
 
-    public ChatViewModel()
+    public ConversationViewModel()
     {
         _apiService = new ApiService();
         SendCommand = new AsyncRelayCommand(SendAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(CurrentInput));
         NewChatCommand = new AsyncRelayCommand(NewChatAsync);
-        _ = LoadSessionsAsync();
+        _ = LoadConversationsAsync();
     }
 
-    private async Task LoadSessionsAsync()
+    private async Task LoadConversationsAsync()
     {
         try
         {
-            var sessions = await _apiService.GetAllSessionsAsync();
+            var conversations = await _apiService.GetAllConversationsAsync();
 
-            foreach (var session in sessions)
+            foreach (var conversation in conversations)
             {
-                Sessions.Add(session);
+                Conversations.Add(conversation);
             }
         }
         catch (Exception)
         {
-            Console.WriteLine("Failed to load sessions.");
+            Console.WriteLine("Failed to load conversations.");
         }
     }
 
@@ -87,22 +87,22 @@ public class ChatViewModel : INotifyPropertyChanged
 
         var userText = CurrentInput;
         CurrentInput = string.Empty;
-        var session = CurrentSession ?? new Session
+        var conversation = CurrentConversation ?? new Conversation
         {
             Id = Guid.NewGuid(),
-            StartedAt = DateTimeOffset.UtcNow,
+            CreatedAt = DateTimeOffset.UtcNow,
         };
-        var sessionId = session.Id;
+        var conversationId = conversation.Id;
 
-        if (CurrentSession is null)
+        if (CurrentConversation is null)
         {
-            Sessions.Add(session);
-            SetCurrentSession(session, loadMessages: false);
+            Conversations.Add(conversation);
+            SetCurrentConversation(conversation, loadMessages: false);
         }
 
         Messages.Add(new Message
         {
-            SessionId = sessionId,
+            ConversationId = conversationId,
             Content = userText,
             Role = "user",
             CreatedAt = DateTimeOffset.UtcNow,
@@ -110,11 +110,11 @@ public class ChatViewModel : INotifyPropertyChanged
 
         try
         {
-            var reply = await _apiService.SendMessageAsync(userText, sessionId);
+            var reply = await _apiService.SendMessageAsync(userText, conversationId);
 
             Messages.Add(new Message
             {
-                SessionId = sessionId,
+                ConversationId = conversationId,
                 Content = reply,
                 Role = "assistant",
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -124,8 +124,8 @@ public class ChatViewModel : INotifyPropertyChanged
         {
             Messages.Add(new Message
             {
-                SessionId = sessionId,
-                Content = "API deu erro",
+                ConversationId = conversationId,
+                Content = "The API request failed.",
                 Role = "assistant",
                 CreatedAt = DateTimeOffset.UtcNow,
             });
@@ -139,7 +139,7 @@ public class ChatViewModel : INotifyPropertyChanged
     private Task NewChatAsync()
     {
         Messages.Clear();
-        CurrentSession = null;
+        CurrentConversation = null;
         return Task.CompletedTask;
     }
 
@@ -150,32 +150,32 @@ public class ChatViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private void SetCurrentSession(Session? session, bool loadMessages)
+    private void SetCurrentConversation(Conversation? conversation, bool loadMessages)
     {
-        if (_currentSession == session) return;
+        if (_currentConversation == conversation) return;
 
-        _currentSession = session;
-        OnPropertyChanged(nameof(CurrentSession));
+        _currentConversation = conversation;
+        OnPropertyChanged(nameof(CurrentConversation));
         SendCommand.RaiseCanExecuteChanged();
 
         if (loadMessages)
         {
-            _ = LoadMessagesAsync(session);
+            _ = LoadMessagesAsync(conversation);
         }
     }
 
-    private async Task LoadMessagesAsync(Session? session)
+    private async Task LoadMessagesAsync(Conversation? conversation)
     {
-        var loadVersion = ++_sessionLoadVersion;
+        var loadVersion = ++_conversationLoadVersion;
         Messages.Clear();
 
-        if (session == null) return;
+        if (conversation == null) return;
 
         try
         {
-            var messages = await _apiService.GetMessagesAsync(session.Id);
+            var messages = await _apiService.GetMessagesAsync(conversation.Id);
 
-            if (loadVersion != _sessionLoadVersion || !ReferenceEquals(CurrentSession, session)) return;
+            if (loadVersion != _conversationLoadVersion || !ReferenceEquals(CurrentConversation, conversation)) return;
 
             foreach (var message in messages)
             {
@@ -184,10 +184,7 @@ public class ChatViewModel : INotifyPropertyChanged
         }
         catch (Exception)
         {
-            if (loadVersion == _sessionLoadVersion)
-            {
-                Console.WriteLine("Failed to load messages.");
-            }
+            if (loadVersion == _conversationLoadVersion) Console.WriteLine("Failed to load messages.");
         }
     }
 }

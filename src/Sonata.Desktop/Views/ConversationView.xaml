@@ -1,9 +1,9 @@
-<Window x:Class="Sonata.Desktop.Views.ChatView"
+<Window x:Class="Sonata.Desktop.Views.ConversationView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Background="{DynamicResource WindowBackgroundBrush}"
-        Title="Chat" Height="800" Width="1000">
+        Title="Sonata" Height="800" Width="1000">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -23,15 +23,15 @@
                 </Grid.RowDefinitions>
                 
                 <ui:Button Grid.Row="0"
-                    Content="New chat"
+                    Content="New conversation"
                     Padding="1, 2"
                     Margin="0, 0, 0, 6"
                     Width="100"
                     HorizontalAlignment="Center"
                     Command="{Binding NewChatCommand}"/>
                 <ListBox Grid.Row="1"
-                         ItemsSource="{Binding Sessions}"
-                         SelectedItem="{Binding CurrentSession}"
+                         ItemsSource="{Binding Conversations}"
+                         SelectedItem="{Binding CurrentConversation}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

@@ -12,28 +12,28 @@ public class ApiService(HttpClient? httpClient = null)
         BaseAddress = new Uri("http://localhost:3000/v1/"),
     };
     
-    public async Task<string> SendMessageAsync(string content, Guid sessionId)
+    public async Task<string> SendMessageAsync(string content, Guid conversationId)
     {
         var res = await _httpClient.PostAsJsonAsync("responses",
-            new { content, sessionId });
+            new { content, conversationId });
         res.EnsureSuccessStatusCode();
 
-        var body = await res.Content.ReadFromJsonAsync<ChatResponse>();
+        var body = await res.Content.ReadFromJsonAsync<ContinueConversationResponse>();
         return body?.Content ?? throw new InvalidOperationException("The API returned an empty response.");
     }
 
-    public async Task<ObservableCollection<Session>> GetAllSessionsAsync()
+    public async Task<ObservableCollection<Conversation>> GetAllConversationsAsync()
     {
-        var res = await _httpClient.GetAsync("sessions");
+        var res = await _httpClient.GetAsync("conversations");
         res.EnsureSuccessStatusCode();
 
-        var body = await res.Content.ReadFromJsonAsync<SessionResponse>();
-        return new ObservableCollection<Session>(body?.Sessions ?? Array.Empty<Session>());
+        var body = await res.Content.ReadFromJsonAsync<ConversationListResponse>();
+        return new ObservableCollection<Conversation>(body?.Conversations ?? Array.Empty<Conversation>());
     }
 
-    public async Task<ObservableCollection<Message>> GetMessagesAsync(Guid sessionId)
+    public async Task<ObservableCollection<Message>> GetMessagesAsync(Guid conversationId)
     {
-        var res = await _httpClient.GetAsync("messages/" + sessionId);
+        var res = await _httpClient.GetAsync($"conversations    /{conversationId}/messages");
         res.EnsureSuccessStatusCode();
 
         var body = await res.Content.ReadFromJsonAsync<MessageResponse>();

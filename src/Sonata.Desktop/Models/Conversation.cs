@@ -1,8 +1,8 @@
 namespace Sonata.Desktop.Models;
 
-public class Session
+public sealed class Conversation
 {
     public Guid Id { get; set; }
-    public DateTimeOffset StartedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? EndedAt { get; set; }
 }

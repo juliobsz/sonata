@@ -12,17 +12,17 @@ public sealed class MessageRepositoryTests(PostgreSqlFixture fixture)
     public async Task AddsAndReturnsMessagesInSequenceOrder()
     {
         await using var context = fixture.CreateDbContext();
-        var session = new Session { Id = Guid.NewGuid() };
-        context.Sessions.Add(session);
+        var conversation = new Conversation { Id = Guid.NewGuid() };
+        context.Conversations.Add(conversation);
         await context.SaveChangesAsync();
 
         var repository = new MessageRepository(context);
 
-        await repository.AddMessageAsync(NewMessage(session.Id, "first"));
-        await repository.AddMessageAsync(NewMessage(session.Id, "second"));
-        await repository.AddMessageAsync(NewMessage(session.Id, "third"));
+        await repository.AddMessageAsync(NewMessage(conversation.Id, "first"));
+        await repository.AddMessageAsync(NewMessage(conversation.Id, "second"));
+        await repository.AddMessageAsync(NewMessage(conversation.Id, "third"));
         
-        var messages = await repository.GetMessagesBySessionId(session.Id);
+        var messages = await repository.GetMessagesByConversationId(conversation.Id);
         
         Assert.Equal(new[] { 1, 2, 3 }, messages.Select(message => message.Sequence));
         Assert.Equal(new[] { "first", "second", "third" }, messages.Select(message => message.Content));
@@ -30,22 +30,22 @@ public sealed class MessageRepositoryTests(PostgreSqlFixture fixture)
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task RejectsDuplicateSequenceWithinOneSession()
+    public async Task RejectsDuplicateSequenceWithinOneConversation()
     {
         await using var context = fixture.CreateDbContext();
-        var session = new Session { Id = Guid.NewGuid() };
+        var conversation = new Conversation { Id = Guid.NewGuid() };
         
-        context.Add(session);
+        context.Add(conversation);
         context.AddRange(
-            NewMessage(session.Id, "one", sequence: 1),
-            NewMessage(session.Id, "duplicate", sequence: 1));
+            NewMessage(conversation.Id, "one", sequence: 1),
+            NewMessage(conversation.Id, "duplicate", sequence: 1));
         
         await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
     }
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task RejectsMessageWithoutARealSession()
+    public async Task RejectsMessageWithoutARealConversation()
     {
         await using var context = fixture.CreateDbContext();
         context.Add(NewMessage(Guid.NewGuid(), "Orphan", sequence: 1));
@@ -53,11 +53,11 @@ public sealed class MessageRepositoryTests(PostgreSqlFixture fixture)
         await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
     }
 
-    private static Message NewMessage(Guid sessionId, string content, int sequence = 0)
+    private static Message NewMessage(Guid conversationId, string content, int sequence = 0)
     {
         return new Message
         {
-            SessionId = sessionId,
+            ConversationId = conversationId,
             Content = content,
             Role = "user",
             Sequence = sequence,

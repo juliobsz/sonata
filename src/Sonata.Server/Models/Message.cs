@@ -9,13 +9,13 @@ public class Message
     [Column("id")]
     public long Id { get; set; }
     
-    [Column("session_id")]
-    public Guid SessionId { get; set; }
+    [Column("conversation_id")]
+    public Guid ConversationId { get; set; }
     
     [Column("sequence")]
     public int Sequence {  get; set; }
 
-    public Session Session { get; set; } = null!;
+    public Conversation Conversation { get; set; } = null!;
     
     [Column("content")]
     [MaxLength(2000)]
